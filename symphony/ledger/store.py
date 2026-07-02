@@ -4,7 +4,9 @@ Every round — including abstentions and Finance vetoes — is written here, in
 keeping with the responsible-ai.md transparency commitment that "every
 deliberation round... is logged to the ledger... nothing is a black box."
 Each detected conflict is also fanned out to an injectable conflict-graph
-hook, which `symphony.protocol.conflict_graph` (a later phase) plugs into.
+hook, which `symphony.protocol.conflict_graph.ConflictGraphWriter.record_conflict`
+plugs into directly (same signature, so a writer instance's bound method can be
+passed as the hook with no adapter).
 """
 
 from __future__ import annotations
@@ -17,8 +19,11 @@ from typing import Any
 
 from symphony.models import Proposal, RoundResult
 
-# Called once per detected conflict as a round is written: (tick, resource, proposals).
-ConflictGraphHook = Callable[[int, str, list[Proposal]], None]
+# Called once per detected conflict as a round is written: (tick, resource,
+# proposals, outcome). `outcome` is the committed agent's name, "vetoed", or
+# "unresolved" — read off the round's already-decided outcome, since the hook
+# fires after COMMIT, not during CONFLICT_CHECK.
+ConflictGraphHook = Callable[[int, str, list[Proposal], str], None]
 
 
 class LedgerStore:
@@ -41,8 +46,18 @@ class LedgerStore:
             f.write(json.dumps(record, default=str) + "\n")
 
         if self.conflict_graph_hook is not None:
+            committed_by_resource = {
+                c["target_resource"]: c["agent"] for c in result.outcome.get("committed", [])
+            }
+            vetoed_resources = {v["target_resource"] for v in result.outcome.get("vetoed", [])}
             for resource, proposals in result.conflicts.items():
-                self.conflict_graph_hook(result.tick, resource, proposals)
+                if resource in committed_by_resource:
+                    outcome = committed_by_resource[resource]
+                elif resource in vetoed_resources:
+                    outcome = "vetoed"
+                else:
+                    outcome = "unresolved"
+                self.conflict_graph_hook(result.tick, resource, proposals, outcome)
 
     def read_all(self) -> list[dict[str, Any]]:
         """Read every ledger entry written so far, oldest first."""
