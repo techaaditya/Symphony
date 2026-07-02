@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Env
+.env
+.env.local
+.env.production
+
+# Symphony runtime artifacts
+*.jsonl
+ledger/*.jsonl
+symphony/benchmark/results/*.json
+!symphony/benchmark/results/.gitkeep
+conflict_graph.json
+
+# Node / dashboard
+dashboard/node_modules/
+dashboard/.next/
+dashboard/out/
+dashboard/.env.local
+npm-debug.log*
+
+# Terraform
+infra/alibaba-cloud/terraform/.terraform/
+infra/alibaba-cloud/terraform/*.tfstate
+infra/alibaba-cloud/terraform/*.tfstate.backup
+infra/alibaba-cloud/terraform/.terraform.lock.hcl
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/

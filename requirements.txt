@@ -1,0 +1,26 @@
+# Core — required to run the simulator, agents (mock LLM), protocol, ledger,
+# and benchmark harness completely offline, at zero token cost.
+pytest>=8.0
+ruff>=0.5
+
+# --- Optional extras (uncomment / pip install -e ".[extra]" as needed) ---
+#
+# Live Qwen / DashScope calls (SYMPHONY_LLM=qwen):
+#   openai>=1.30            # DashScope exposes an OpenAI-compatible endpoint
+#
+# Conflict Graph Explorer backed by real Neo4j (NEO4J_URI set):
+#   neo4j>=5.20
+#
+# ApsaraMQ-for-Kafka event bus (SYMPHONY_BUS=kafka):
+#   kafka-python>=2.0
+#
+# Alibaba Tablestore blackboard (SYMPHONY_BLACKBOARD=tablestore):
+#   tablestore>=5.4
+#
+# REST API server (FastAPI + SSE):
+#   fastapi>=0.111
+#   uvicorn[standard]>=0.30
+#   sse-starlette>=2.1
+#
+# Equivalent grouped installs are defined in pyproject.toml:
+#   pip install -e ".[llm,graph,bus,cloud,api,dev]"
