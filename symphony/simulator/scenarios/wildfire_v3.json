@@ -1,0 +1,54 @@
+{
+  "scenario_id": "wildfire_v3",
+  "description": "A wildfire spreads across two zones over 20 ticks. All zone, event and resource data is synthetically generated for this simulation — see responsible-ai.md.",
+  "ticks": 20,
+  "zones": [
+    {
+      "id": "zone-1",
+      "name": "Ridgeline District",
+      "lat": 38.90,
+      "lng": -120.98,
+      "population": 4200
+    },
+    {
+      "id": "zone-2",
+      "name": "Lakeview Basin",
+      "lat": 38.85,
+      "lng": -121.05,
+      "population": 6100
+    }
+  ],
+  "resources": {
+    "helicopters": 2,
+    "medic_teams": 3,
+    "sar_teams": 2,
+    "comms_towers": 2,
+    "budget": 500000
+  },
+  "towers": [
+    { "id": "tower-1", "zone_id": "zone-1" },
+    { "id": "tower-2", "zone_id": "zone-2" }
+  ],
+  "events": [
+    { "tick": 1, "type": "fire_spread", "zone_id": "zone-1", "payload": { "intensity_delta": 0.25 } },
+    { "tick": 2, "type": "fire_spread", "zone_id": "zone-2", "payload": { "intensity_delta": 0.15 } },
+    { "tick": 3, "type": "road_closure", "zone_id": "zone-1", "payload": {} },
+    { "tick": 4, "type": "casualty_report", "zone_id": "zone-2", "payload": { "count": 5, "severity": "serious" } },
+    { "tick": 4, "type": "trapped_report", "zone_id": "zone-2", "payload": { "count": 3, "window_ends_tick": 9 } },
+    { "tick": 5, "type": "tower_outage", "zone_id": "zone-1", "payload": { "tower_id": "tower-1" } },
+    { "tick": 6, "type": "fire_spread", "zone_id": "zone-1", "payload": { "intensity_delta": 0.30 } },
+    { "tick": 7, "type": "casualty_report", "zone_id": "zone-1", "payload": { "count": 3, "severity": "minor" } },
+    { "tick": 8, "type": "fire_spread", "zone_id": "zone-2", "payload": { "intensity_delta": 0.20 } },
+    { "tick": 9, "type": "trapped_report", "zone_id": "zone-1", "payload": { "count": 2, "window_ends_tick": 13 } },
+    { "tick": 10, "type": "casualty_report", "zone_id": "zone-2", "payload": { "count": 8, "severity": "critical" } },
+    { "tick": 11, "type": "tower_outage", "zone_id": "zone-2", "payload": { "tower_id": "tower-2" } },
+    { "tick": 12, "type": "fire_spread", "zone_id": "zone-1", "payload": { "intensity_delta": 0.15 } },
+    { "tick": 13, "type": "road_closure", "zone_id": "zone-2", "payload": {} },
+    { "tick": 14, "type": "casualty_report", "zone_id": "zone-1", "payload": { "count": 4, "severity": "serious" } },
+    { "tick": 15, "type": "fire_spread", "zone_id": "zone-2", "payload": { "intensity_delta": 0.25 } },
+    { "tick": 16, "type": "trapped_report", "zone_id": "zone-2", "payload": { "count": 4, "window_ends_tick": 19 } },
+    { "tick": 17, "type": "casualty_report", "zone_id": "zone-2", "payload": { "count": 2, "severity": "minor" } },
+    { "tick": 18, "type": "fire_spread", "zone_id": "zone-1", "payload": { "intensity_delta": 0.20 } },
+    { "tick": 19, "type": "casualty_report", "zone_id": "zone-1", "payload": { "count": 6, "severity": "critical" } }
+  ]
+}
