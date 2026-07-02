@@ -43,6 +43,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from symphony.config import SymphonyConfig, get_config
+from symphony.models import SEVERITY_RANK
 
 # Deterministic per-resource cost estimates the mock uses for proposal costing
 # and Finance's veto threshold — a stand-in for what a real Qwen agent would
@@ -54,8 +55,6 @@ RESOURCE_COSTS: dict[str, float] = {
     "comms_tower": 6_000.0,
     "ground_vehicle": 1_500.0,
 }
-
-_SEVERITY_RANK = {"minor": 1, "serious": 2, "critical": 3}
 
 # A tight time-critical window (in ticks) below which SAR prefers the faster
 # helicopter over its slower dedicated ground team.
@@ -204,7 +203,7 @@ class MockProvider:
                 "confidence": confidence,
                 "cost": 0.0,
             }
-        worst = max(casualties, key=lambda c: _SEVERITY_RANK.get(c["severity"], 0))
+        worst = max(casualties, key=lambda c: SEVERITY_RANK.get(c["severity"], 0))
         if worst["severity"] in ("serious", "critical"):
             return {
                 "agent": "medical",

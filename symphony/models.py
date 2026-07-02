@@ -94,6 +94,12 @@ class ResourcePools:
     budget_remaining: float
 
 
+# Shared ranking so any code choosing "the worst untreated casualty" (the mock
+# LLM provider and the Parliament Protocol's commit logic both do this) agrees
+# on what "worst" means.
+SEVERITY_RANK: dict[str, int] = {"minor": 1, "serious": 2, "critical": 3}
+
+
 @dataclass
 class CasualtyReport:
     """A confirmed casualty event Medical must respond to."""
