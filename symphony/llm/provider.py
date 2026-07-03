@@ -27,6 +27,10 @@ Agents (symphony.agents, a later phase) encode each call as a JSON object:
 - "score_persuasiveness": context = {"rebuttal_text": str}
 - "coordinator_rule": context = {"resource": str, "candidates": list[str],
   "debate_log": list[dict], "votes": dict[str, float]}
+- "generalist_decide": no extra context required. Used only by the
+  single-agent benchmark baseline (symphony.benchmark.single_agent_baseline),
+  never by the five specialists or Coordinator — see that module's docstring
+  for why a single generalist gets one decision per tick instead of five.
 
 `MockProvider` returns JSON text matching the doc §3 response schemas for the
 corresponding call type. `QwenProvider` relies on the live model actually
@@ -112,6 +116,7 @@ class MockProvider:
             "rebut": self._rebut,
             "score_persuasiveness": self._score_persuasiveness,
             "coordinator_rule": self._coordinator_rule,
+            "generalist_decide": self._generalist_decide,
         }.get(call_type)
         if handler is None:
             raise ValueError(f"Unknown call_type: {call_type!r}")
@@ -314,6 +319,112 @@ class MockProvider:
             "action": "flag_budget_risk",
             "target_resource": "budget",
             "rationale": f"Remaining budget ${budget:,.0f} is healthy; no veto needed this tick.",
+            "confidence": confidence,
+            "cost": 0.0,
+        }
+
+    def _generalist_decide(self, request: dict[str, Any]) -> dict[str, Any]:
+        """The single-agent baseline's one decision this tick.
+
+        No specialists, no debate: a fixed urgency ranking (confirmed
+        casualties > time-critical trapped persons > a down comms tower >
+        active fire) over the same blackboard the society sees, picking
+        exactly one action. `domain` tags which specialist's bookkeeping
+        (symphony.protocol.commit.mark_served) the chosen action maps to, so
+        a committed baseline action is scored identically to a committed
+        society one.
+        """
+        blackboard = request["blackboard"]
+        tick = request["tick"]
+        confidence = self._rng_confidence("generalist", "decide", str(tick))
+
+        casualties = self._untreated_casualties(blackboard)
+        if casualties:
+            worst = max(casualties, key=lambda c: SEVERITY_RANK.get(c["severity"], 0))
+            if worst["severity"] in ("serious", "critical"):
+                return {
+                    "domain": "medical",
+                    "action": "request_helicopter_transport",
+                    "target_resource": "helicopter",
+                    "rationale": (
+                        f"{worst['count']} {worst['severity']} casualties in zone "
+                        f"{worst['zone_id']} is the single most urgent thing I can act on."
+                    ),
+                    "confidence": confidence,
+                    "cost": RESOURCE_COSTS["helicopter"],
+                }
+            return {
+                "domain": "medical",
+                "action": "deploy_medic_team",
+                "target_resource": "medic_team",
+                "rationale": (
+                    f"{worst['count']} minor casualties in zone {worst['zone_id']}; treating them."
+                ),
+                "confidence": confidence,
+                "cost": RESOURCE_COSTS["medic_team"],
+            }
+
+        trapped = self._unrescued_trapped(blackboard)
+        if trapped:
+            most_urgent = min(trapped, key=lambda t: t["window_ends_tick"] - tick)
+            window_left = most_urgent["window_ends_tick"] - tick
+            if window_left <= _URGENT_WINDOW_TICKS:
+                return {
+                    "domain": "sar",
+                    "action": "request_helicopter_transport",
+                    "target_resource": "helicopter",
+                    "rationale": (
+                        f"{most_urgent['count']} trapped in zone {most_urgent['zone_id']} with "
+                        f"{window_left} ticks left is the most time-critical need right now."
+                    ),
+                    "confidence": confidence,
+                    "cost": RESOURCE_COSTS["helicopter"],
+                }
+            return {
+                "domain": "sar",
+                "action": "deploy_sar_team",
+                "target_resource": "sar_team",
+                "rationale": (
+                    f"{most_urgent['count']} trapped in zone {most_urgent['zone_id']}; "
+                    "dispatching a ground team."
+                ),
+                "confidence": confidence,
+                "cost": RESOURCE_COSTS["sar_team"],
+            }
+
+        down_towers = [t for t in blackboard["towers"].values() if not t["operational"]]
+        if down_towers:
+            tower = down_towers[0]
+            return {
+                "domain": "comms",
+                "action": "repair_tower",
+                "target_resource": "comms_tower",
+                "rationale": (
+                    f"Tower {tower['id']} is down; repairing it before anything else degrades."
+                ),
+                "confidence": confidence,
+                "cost": RESOURCE_COSTS["comms_tower"],
+            }
+
+        hottest = self._hottest_zone(blackboard)
+        if hottest and hottest["fire_intensity"] >= 0.3:
+            return {
+                "domain": "logistics",
+                "action": "route_helicopter",
+                "target_resource": "helicopter",
+                "rationale": (
+                    f"Zone {hottest['id']} fire intensity is {hottest['fire_intensity']:.2f}; "
+                    "slowing it down before it creates new casualties."
+                ),
+                "confidence": confidence,
+                "cost": RESOURCE_COSTS["helicopter"],
+            }
+
+        return {
+            "domain": None,
+            "action": "hold_position",
+            "target_resource": None,
+            "rationale": "Nothing urgent enough to act on this tick.",
             "confidence": confidence,
             "cost": 0.0,
         }

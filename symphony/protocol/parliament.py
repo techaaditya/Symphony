@@ -38,11 +38,11 @@ from typing import TYPE_CHECKING, Any
 from symphony.models import (
     MAJORITY_THRESHOLD,
     MAX_DEBATE_ROUNDS,
-    SEVERITY_RANK,
     BlackboardState,
     Proposal,
     RoundResult,
 )
+from symphony.protocol.commit import apply_commit
 
 if TYPE_CHECKING:
     from symphony.agents.base_agent import BaseAgent
@@ -50,16 +50,6 @@ if TYPE_CHECKING:
     from symphony.ledger.store import LedgerStore
 
 logger = logging.getLogger(__name__)
-
-# Resource types backed by a decrementable pool on BlackboardState.resources.
-# "ground_vehicle" and "budget" are deliberately absent: the former has no
-# tracked pool, the latter is Finance's advisory target, not a claimable one.
-_RESOURCE_POOL_FIELD: dict[str, str] = {
-    "helicopter": "helicopters",
-    "medic_team": "medic_teams",
-    "sar_team": "sar_teams",
-    "comms_tower": "comms_towers",
-}
 
 _NON_FINANCE_AGENTS = frozenset({"logistics", "medical", "comms", "sar"})
 OVERRIDE_CONFIDENCE_THRESHOLD = 0.75
@@ -288,7 +278,7 @@ class ParliamentProtocol:
                     }
                 )
                 continue
-            committed.append(self._apply_commit(proposal, blackboard_state))
+            committed.append(apply_commit(proposal, blackboard_state))
         return {"committed": committed, "vetoed": dropped}
 
     def _active_vetoes(self, proposals: list[Proposal]) -> set[str]:
@@ -306,47 +296,3 @@ class ParliamentProtocol:
             for name in _NON_FINANCE_AGENTS
         )
         return set() if unanimous_override else finance_vetoes
-
-    def _apply_commit(
-        self, proposal: Proposal, blackboard_state: BlackboardState
-    ) -> dict[str, Any]:
-        """Deterministically apply one committed proposal to the blackboard:
-        decrement the resource pool it drew from, spend its cost against the
-        budget, and mark whatever casualty/trapped/tower record it served."""
-        pool_field = _RESOURCE_POOL_FIELD.get(proposal.target_resource or "")
-        if pool_field is not None:
-            current = getattr(blackboard_state.resources, pool_field)
-            setattr(blackboard_state.resources, pool_field, max(0, current - 1))
-        if proposal.cost:
-            blackboard_state.resources.budget_remaining = round(
-                blackboard_state.resources.budget_remaining - proposal.cost, 2
-            )
-        self._mark_served(proposal, blackboard_state)
-        return {
-            "agent": proposal.agent,
-            "action": proposal.action,
-            "target_resource": proposal.target_resource,
-            "cost": proposal.cost,
-        }
-
-    def _mark_served(self, proposal: Proposal, blackboard_state: BlackboardState) -> None:
-        if proposal.agent == "medical" and proposal.action in (
-            "request_helicopter_transport",
-            "deploy_medic_team",
-        ):
-            untreated = [c for c in blackboard_state.casualties if not c.treated]
-            if untreated:
-                worst = max(untreated, key=lambda c: SEVERITY_RANK.get(c.severity, 0))
-                worst.treated = True
-        elif proposal.agent == "sar" and proposal.action in (
-            "request_helicopter_transport",
-            "deploy_sar_team",
-        ):
-            unrescued = [t for t in blackboard_state.trapped if not t.rescued]
-            if unrescued:
-                most_urgent = min(unrescued, key=lambda t: t.window_ends_tick)
-                most_urgent.rescued = True
-        elif proposal.agent == "comms" and proposal.action == "repair_tower":
-            down = [t for t in blackboard_state.towers.values() if not t.operational]
-            if down:
-                down[0].operational = True
