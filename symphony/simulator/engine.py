@@ -82,19 +82,34 @@ class Simulator:
         self.blackboard_store.save(deepcopy(self.state))
 
     def run(self, round_runner: RoundRunner | None = None) -> list[BlackboardState]:
-        """Advance through every tick; return the per-tick state snapshots."""
-        for tick in range(1, self.ticks_total + 1):
-            for event in self._events_by_tick.get(tick, []):
-                self.bus.publish(event)
-                self._apply_event(event)
-            self.state.tick = tick
-
-            if round_runner is not None:
-                round_runner(tick, self.state)
-
-            self.blackboard_store.save(deepcopy(self.state))
-            self.history.append(deepcopy(self.state))
+        """Advance through every remaining tick; return the per-tick snapshots."""
+        while self.state.tick < self.ticks_total:
+            self.step(round_runner)
         return self.history
+
+    def step(self, round_runner: RoundRunner | None = None) -> BlackboardState:
+        """Advance exactly one tick and return the resulting state.
+
+        Pulled out of `run()` so a caller that needs to drive ticks one at a
+        time — the REST API's `/sim/tick` and `/sim/stream` endpoints, a
+        later phase — can do so without duplicating event-application logic,
+        while `run()` stays a thin loop over this same method.
+        """
+        if self.state.tick >= self.ticks_total:
+            raise StopIteration("scenario already finished")
+
+        tick = self.state.tick + 1
+        for event in self._events_by_tick.get(tick, []):
+            self.bus.publish(event)
+            self._apply_event(event)
+        self.state.tick = tick
+
+        if round_runner is not None:
+            round_runner(tick, self.state)
+
+        self.blackboard_store.save(deepcopy(self.state))
+        self.history.append(deepcopy(self.state))
+        return self.state
 
     # -- construction ---------------------------------------------------
 

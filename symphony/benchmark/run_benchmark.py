@@ -26,7 +26,7 @@ from symphony.agents import (
 from symphony.benchmark.metrics import compute_outcome
 from symphony.benchmark.single_agent_baseline import run_single_agent_baseline
 from symphony.benchmark.token_counter import TokenCountingProvider
-from symphony.ledger.store import LedgerStore
+from symphony.ledger.store import ConflictGraphHook, LedgerStore
 from symphony.llm.provider import LLMProvider, get_provider
 from symphony.protocol.parliament import ParliamentProtocol
 from symphony.simulator.engine import load_scenario
@@ -43,10 +43,12 @@ def build_society(
     specialist_provider: LLMProvider | None = None,
     coordinator_provider: LLMProvider | None = None,
     ledger_path: str | Path | None = None,
+    conflict_graph_hook: ConflictGraphHook | None = None,
 ) -> tuple[ParliamentProtocol, TokenCountingProvider, TokenCountingProvider]:
     """Construct one Parliament Protocol instance wired to token-counting
-    providers, so both `run_symphony_society` and the CLI's `sim` command
-    (which wants to print each round live) can share one construction path.
+    providers, so `run_symphony_society`, the CLI's `sim` command, and the
+    REST API's session registry (a later phase) can all share one
+    construction path instead of duplicating agent/coordinator/ledger wiring.
     """
     specialists = TokenCountingProvider(specialist_provider or get_provider("specialist"))
     coordinator_backend = TokenCountingProvider(coordinator_provider or get_provider("coordinator"))
@@ -59,7 +61,7 @@ def build_society(
     ]
     coordinator = Coordinator(coordinator_backend)
     resolved_path = Path(ledger_path) if ledger_path else Path(tempfile.mktemp(suffix=".jsonl"))
-    ledger = LedgerStore(resolved_path)
+    ledger = LedgerStore(resolved_path, conflict_graph_hook=conflict_graph_hook)
     protocol = ParliamentProtocol(agents, coordinator, ledger)
     return protocol, specialists, coordinator_backend
 
