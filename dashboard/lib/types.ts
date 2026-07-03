@@ -18,22 +18,77 @@ export interface Proposal {
   cost: number;
 }
 
-export interface RoundResultPayload {
+export interface WorldStatePayload {
+  tick: number;
+  zones: Record<string, Zone>;
+  resources: ResourcePools;
+  towers: Record<string, Tower>;
+  casualties: CasualtyReport[];
+  trapped: TrappedReport[];
+}
+
+export interface DebateLogEntry {
+  resource: string;
+  round: number;
+  agent: string;
+  rebuttal: string;
+  scores: Record<string, number>;
+}
+
+export interface CommittedAction {
+  agent: string;
+  action: string;
+  target_resource: string | null;
+  cost: number;
+  served: boolean | null;
+}
+
+export interface VetoedAction {
+  agent: string;
+  target_resource: string;
+  reason: string;
+}
+
+export interface CoordinatorRuling {
+  resource: string;
+  ruling: string;
+  [key: string]: unknown;
+}
+
+export interface RoundOutcome {
+  committed: CommittedAction[];
+  vetoed: VetoedAction[];
+  coordinator_rulings?: CoordinatorRuling[];
+}
+
+/** One Parliament Protocol round, the shape written to the JSONL ledger
+ * (`symphony/ledger/store.py`) -- no `world_state`, since that's a live-view
+ * concern, not part of the deliberation record itself. */
+export interface DeliberationRound {
   tick: number;
   proposals: Proposal[];
   conflicts: Record<string, Proposal[]>;
-  debate_log: Record<string, unknown>[];
+  debate_log: DebateLogEntry[];
   votes: Record<string, Record<string, number>>;
-  outcome: Record<string, unknown>;
+  outcome: RoundOutcome;
   escalated: boolean;
 }
 
-export interface SingleAgentTickPayload {
+export interface RoundResultPayload extends DeliberationRound {
+  world_state: WorldStatePayload;
+}
+
+export interface SingleAgentLedgerEntry {
   tick: number;
-  committed: Record<string, unknown> | null;
+  committed: CommittedAction | null;
+}
+
+export interface SingleAgentTickPayload extends SingleAgentLedgerEntry {
+  world_state: WorldStatePayload;
 }
 
 export type TickResultPayload = RoundResultPayload | SingleAgentTickPayload;
+export type LedgerEntry = DeliberationRound | SingleAgentLedgerEntry;
 
 export interface SimStartRequest {
   scenario_id?: string;
@@ -59,7 +114,7 @@ export interface SimTickResponse {
 export interface SimLedgerResponse {
   sim_id: string;
   mode: SimMode;
-  entries: Record<string, unknown>[];
+  entries: LedgerEntry[];
 }
 
 export interface MetricSummary {

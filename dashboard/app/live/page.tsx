@@ -1,11 +1,93 @@
-import StubView from "@/components/StubView";
+"use client";
+
+import dynamic from "next/dynamic";
+import { useState } from "react";
+import AgentGraph from "@/components/AgentGraph";
+import { startSim } from "@/lib/api";
+import { AGENT_ORDER, agentColor, useThemePalette } from "@/lib/colors";
+import { useSimStream } from "@/hooks/useSimStream";
+import type { SimMode } from "@/lib/types";
+
+// Leaflet touches `window` at module-eval time, so the map must never be
+// part of the server-rendered bundle.
+const DisasterMap = dynamic(() => import("@/components/DisasterMap"), { ssr: false });
 
 export default function LivePage() {
+  const [simId, setSimId] = useState<string | null>(null);
+  const [mode, setMode] = useState<SimMode>("society");
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const palette = useThemePalette();
+
+  const stream = useSimStream(simId, 400);
+
+  async function handleStart() {
+    setStarting(true);
+    setError(null);
+    try {
+      const session = await startSim({ scenario_id: "wildfire_v3", seed: 42, mode });
+      setSimId(session.sim_id);
+    } catch {
+      setError("Could not reach the Symphony API. Is it running on NEXT_PUBLIC_API_URL?");
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  const worldState = stream.latest?.world_state ?? null;
+
   return (
-    <StubView
-      title="Live"
-      description="A leaflet map of scenario zones plus a react-flow graph of the five agents and Coordinator, both animated tick by tick from /sim/stream."
-      phase="Wired in Phase 10"
-    />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-xl font-semibold text-text-primary">Live</h1>
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value as SimMode)}
+          disabled={!!simId}
+          className="rounded-md border border-border bg-surface-1 px-2 py-1 text-sm text-text-primary"
+        >
+          <option value="society">Society (5 agents)</option>
+          <option value="single_agent">Single-agent baseline</option>
+        </select>
+        <button
+          onClick={handleStart}
+          disabled={starting || (!!simId && !stream.finished)}
+          className="rounded-md bg-text-primary px-3 py-1.5 text-sm font-medium text-page-plane disabled:opacity-40"
+        >
+          {simId && !stream.finished ? "Running…" : "Start scenario"}
+        </button>
+        {stream.finished && <span className="text-sm text-status-good">Run complete</span>}
+        {(error || stream.error) && (
+          <span className="text-sm text-status-critical">{error ?? stream.error}</span>
+        )}
+        <span className="ml-auto text-sm text-text-secondary">
+          Tick {stream.latest?.tick ?? 0}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-sm font-medium text-text-secondary">Disaster map</h2>
+          <DisasterMap worldState={worldState} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-sm font-medium text-text-secondary">Agent graph</h2>
+          <AgentGraph latest={stream.latest} />
+          {mode === "society" && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+              {AGENT_ORDER.map((agent) => (
+                <span key={agent} className="flex items-center gap-1.5 text-xs text-text-secondary">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ background: agentColor(palette, agent) }}
+                  />
+                  <span className="capitalize">{agent}</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

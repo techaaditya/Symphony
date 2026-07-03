@@ -12,14 +12,14 @@ from __future__ import annotations
 
 import tempfile
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 from symphony.benchmark.run_benchmark import build_society
 from symphony.benchmark.single_agent_baseline import SingleAgentBaseline
 from symphony.llm.provider import get_provider
-from symphony.models import RoundResult
+from symphony.models import BlackboardState, RoundResult
 from symphony.protocol.conflict_graph import JsonConflictGraphWriter
 from symphony.protocol.parliament import ParliamentProtocol
 from symphony.simulator.engine import Simulator, load_scenario
@@ -67,7 +67,19 @@ class SimSession:
         else:
             payload = {"tick": self.current_tick, "committed": captured[0]}
             self.baseline_log.append(payload)
+        payload["world_state"] = _world_state_payload(self.sim.state)
         return payload
+
+
+def _world_state_payload(state: BlackboardState) -> dict[str, Any]:
+    """Serialize the current blackboard snapshot for the dashboard's live map.
+
+    A plain `dataclasses.asdict` -- the map only reads geo/status fields, so
+    there's no need for a hand-picked subset the way `_proposal_payload` picks
+    fields off `Proposal` (which also carries internal veto bookkeeping the
+    dashboard doesn't need).
+    """
+    return asdict(state)
 
 
 def _round_result_payload(result: RoundResult) -> dict[str, Any]:
