@@ -26,9 +26,9 @@ from pathlib import Path
 from typing import Any
 
 from symphony.blackboard.base import BlackboardStore
-from symphony.blackboard.memory_store import InMemoryBlackboardStore
+from symphony.blackboard.factory import get_blackboard_store
 from symphony.bus.base import EventBus
-from symphony.bus.memory_bus import InMemoryEventBus
+from symphony.bus.factory import get_event_bus
 from symphony.models import (
     BlackboardState,
     CasualtyReport,
@@ -73,8 +73,12 @@ class Simulator:
         self.ticks_total: int = scenario["ticks"]
         self.seed = seed
         self.rng = random.Random(seed)
-        self.bus = bus or InMemoryEventBus()
-        self.blackboard_store = blackboard_store or InMemoryBlackboardStore()
+        # Falls back to whichever backend `symphony.config` selects (real
+        # Tablestore/Kafka if configured, in-memory otherwise), so setting
+        # SYMPHONY_BUS/SYMPHONY_BLACKBOARD takes effect without every caller
+        # needing to construct and pass a backend explicitly.
+        self.bus = bus or get_event_bus()
+        self.blackboard_store = blackboard_store or get_blackboard_store()
 
         self._events_by_tick = self._index_events(scenario["events"])
         self.state: BlackboardState = self._build_initial_state(scenario)
