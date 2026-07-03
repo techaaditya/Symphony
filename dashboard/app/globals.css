@@ -62,6 +62,10 @@
   --color-gridline: var(--gridline);
   --color-baseline: var(--baseline);
   --color-border: var(--border);
+  --color-status-good: var(--status-good);
+  --color-status-warning: var(--status-warning);
+  --color-status-serious: var(--status-serious);
+  --color-status-critical: var(--status-critical);
 }
 
 body {
