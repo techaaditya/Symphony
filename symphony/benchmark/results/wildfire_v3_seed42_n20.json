@@ -1,0 +1,47 @@
+{
+  "single_agent": {
+    "mode": "single_agent",
+    "scenario_id": "wildfire_v3",
+    "n_trials": 20,
+    "objectives_met_pct": {
+      "mean": 100.0,
+      "sd": 0.0
+    },
+    "time_to_allocate_s": {
+      "mean": 0.0047,
+      "sd": 0.0005
+    },
+    "resource_waste_pct": {
+      "mean": 0.0,
+      "sd": 0.0
+    },
+    "token_cost": {
+      "mean": 9399.35,
+      "sd": 1.4609
+    }
+  },
+  "society": {
+    "mode": "society",
+    "scenario_id": "wildfire_v3",
+    "n_trials": 20,
+    "objectives_met_pct": {
+      "mean": 63.64,
+      "sd": 0.0
+    },
+    "time_to_allocate_s": {
+      "mean": 0.0655,
+      "sd": 0.0064
+    },
+    "resource_waste_pct": {
+      "mean": 0.0,
+      "sd": 0.0
+    },
+    "token_cost": {
+      "mean": 247095.15,
+      "sd": 28.592
+    }
+  },
+  "scenario_id": "wildfire_v3",
+  "seed": 42,
+  "n_trials": 20
+}

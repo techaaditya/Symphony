@@ -24,6 +24,7 @@ htmlcov/
 ledger/*.jsonl
 symphony/benchmark/results/*.json
 !symphony/benchmark/results/.gitkeep
+!symphony/benchmark/results/wildfire_v3_seed42_n20.json
 conflict_graph.json
 
 # Node / dashboard

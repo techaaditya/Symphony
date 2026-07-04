@@ -23,7 +23,7 @@
     "medic_teams": 3,
     "sar_teams": 2,
     "comms_towers": 2,
-    "budget": 500000
+    "budget": 220000
   },
   "towers": [
     { "id": "tower-1", "zone_id": "zone-1" },
