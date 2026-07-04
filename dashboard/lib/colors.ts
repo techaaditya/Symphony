@@ -47,6 +47,15 @@ export function agentColor(palette: Palette, agent: string): string {
   return index >= 0 ? palette.series[index] : palette.textMuted;
 }
 
+/** Fixed benchmark-mode -> categorical-slot order, independent of AGENT_ORDER's
+ * slot assignment (a different chart, a different identity dimension). */
+export const MODE_ORDER = ["single_agent", "society"] as const;
+
+export function modeColor(palette: Palette, mode: string): string {
+  const index = MODE_ORDER.indexOf(mode as (typeof MODE_ORDER)[number]);
+  return index >= 0 ? palette.series[index] : palette.textMuted;
+}
+
 /** Maps a 0..1 fire intensity onto the sequential blue ramp (magnitude encoding). */
 export function intensityColor(palette: Palette, intensity: number): string {
   const steps = palette.sequentialBlue;
