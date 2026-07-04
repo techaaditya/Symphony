@@ -38,6 +38,8 @@ infra/alibaba-cloud/terraform/.terraform/
 infra/alibaba-cloud/terraform/*.tfstate
 infra/alibaba-cloud/terraform/*.tfstate.backup
 infra/alibaba-cloud/terraform/.terraform.lock.hcl
+infra/alibaba-cloud/terraform/*.tfvars
+!infra/alibaba-cloud/terraform/terraform.tfvars.example
 
 # OS / editor
 .DS_Store

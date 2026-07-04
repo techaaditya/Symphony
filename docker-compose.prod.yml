@@ -1,0 +1,26 @@
+# Cloud deploy: only the api and dashboard containers -- Neo4j, Tablestore
+# and ApsaraMQ for Kafka are the real managed/ECS-hosted services Terraform
+# provisioned, not local containers (unlike docker-compose.yml's all-local
+# stack). Run on the Neo4j ECS instance itself per DEPLOY_RUNBOOK.md, reading
+# every setting from .env.production (never committed -- see render-env.sh).
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    env_file: .env.production
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    restart: unless-stopped

@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars and fill in. Never commit the real file --
+# it's already covered by the root .gitignore's *.tfvars rule below.
+
+region            = "ap-southeast-1"
+zone_id           = "ap-southeast-1a"
+name_prefix       = "symphony"
+ssh_public_key    = "ssh-ed25519 AAAA... your-key-here"
+allowed_ssh_cidr  = "203.0.113.4/32" # your IP, /32 -- never 0.0.0.0/0
+
+# Set the Neo4j password via an environment variable instead of this file:
+#   export TF_VAR_neo4j_password="..."
+#
+# DASHSCOPE_API_KEY is not a Terraform variable -- it never touches
+# terraform state. Export it in your shell before running render-env.sh if
+# you want the deployed API on live Qwen instead of the zero-cost
+# MockProvider; see ../DEPLOY_RUNBOOK.md.
