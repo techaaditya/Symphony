@@ -35,30 +35,51 @@ for every adapter setting.
 
 ## Quickstart
 
-> Full quickstart lands as each phase of the build is completed. Current status: repo scaffold.
+### Python core only (no Docker, zero cost)
 
 ```bash
 pip install -e ".[dev]"
-pytest -q
+pytest -q                                        # 87+ tests, mock LLM, no network
+
+symphony sim --scenario wildfire_v3 --seed 42     # one seeded run, printed to the terminal
+symphony benchmark --n 5                          # society vs. single-agent, mean/SD table
 ```
 
-Once the simulator and CLI land (build phases 1–6):
+### Full stack (dashboard + REST API + real Neo4j + real Kafka)
 
 ```bash
-symphony sim --scenario wildfire_v3 --seed 42
-symphony benchmark --n 5
+pip install -e ".[api]"                           # only needed if you run the API outside Docker
+cp .env.example .env                              # optional: tune adapters, still zero-cost by default
+make up                                           # builds and starts neo4j, redpanda, api, dashboard
+make seed                                         # drives one real scenario through the running stack
+```
+
+- Dashboard: <http://localhost:3000> (live map + agent graph, ledger replay, Conflict Graph
+  Explorer, benchmark chart)
+- API docs: <http://localhost:8000/docs>
+- Neo4j browser: <http://localhost:7474> (`neo4j` / `symphony123` by default — see `Makefile`)
+
+`make down` stops the stack; `make clean` also wipes the Neo4j volume for a clean-slate demo.
+See the [`Makefile`](Makefile) for the rest (`logs`, `build`, `test`, `bench`).
+
+### Live Qwen run (optional, real API calls)
+
+```bash
+SYMPHONY_LLM=qwen DASHSCOPE_API_KEY=... symphony sim --scenario wildfire_v3 --seed 42
 ```
 
 ## Repository layout
 
 ```
 symphony/
-├── symphony/            # Python backend package
-│   ├── config.py        # env-driven adapter selection (this phase)
-│   ├── blackboard/       bus/       simulator/       llm/
-│   ├── agents/          protocol/  ledger/          benchmark/
-│   └── api/              # FastAPI server (later phase)
-├── dashboard/            # Next.js dashboard (later phase)
+├── symphony/             # Python backend package
+│   ├── config.py         # env-driven adapter selection
+│   ├── blackboard/        bus/        simulator/        llm/
+│   ├── agents/           protocol/   ledger/            benchmark/
+│   └── api/              # FastAPI server + SSE stream (doc §12)
+├── dashboard/            # Next.js dashboard: live map, agent graph, ledger replay,
+│                         # Conflict Graph Explorer, benchmark chart
+├── docker-compose.yml    # local Neo4j + Redpanda + api + dashboard
 ├── infra/alibaba-cloud/  # Terraform + deploy runbook (later phase)
 ├── docs/                 # architecture, demo script, self-audit (later phase)
 └── tests/

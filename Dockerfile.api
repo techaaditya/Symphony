@@ -1,0 +1,15 @@
+# The FastAPI server (symphony/api), for docker-compose's local stack.
+# Includes the graph/bus extras so it can actually talk to the compose
+# Neo4j/Redpanda services -- not just the zero-config in-memory defaults.
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY symphony ./symphony
+
+RUN pip install --no-cache-dir ".[api,graph,bus,llm]"
+
+EXPOSE 8000
+
+CMD ["uvicorn", "symphony.api.app:app", "--host", "0.0.0.0", "--port", "8000"]

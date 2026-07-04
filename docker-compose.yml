@@ -1,0 +1,79 @@
+# One-command local stack: real Neo4j-backed Conflict Graph Explorer and a
+# real Kafka-API broker (Redpanda) behind the same adapters used everywhere
+# else in Symphony, plus the FastAPI server and Next.js dashboard. The LLM
+# stays on the zero-cost MockProvider by default -- override SYMPHONY_LLM /
+# DASHSCOPE_API_KEY below for a live run.
+#
+# Usage: `make up` (or `docker compose up --build`), then open
+# http://localhost:3000. `make seed` populates a demo run so the Conflict
+# Graph Explorer and ledger replay have something real to show.
+
+services:
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-symphony123}
+    ports:
+      - "7474:7474" # browser UI
+      - "7687:7687" # bolt
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:7474"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=1G
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+    environment:
+      SYMPHONY_LLM: ${SYMPHONY_LLM:-mock}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      SYMPHONY_BUS: kafka
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-symphony123}
+      SYMPHONY_API_CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "8000:8000"
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  neo4j_data:
