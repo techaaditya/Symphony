@@ -1,60 +1,72 @@
 @import "tailwindcss";
 
 /*
- * Theme tokens follow the project's dataviz palette (light-mode default,
- * dark-mode selected — not an automatic filter-invert). Chart components
- * reference the --series-* / --status-* roles directly instead of raw hex,
- * so every view in the dashboard reads as one system.
+ * Exact Color Hunt palette, single fixed light theme (no prefers-color-
+ * scheme variant -- a previous revision auto-swapped to a dark espresso
+ * surface for users with OS dark mode on, which read as a "heavy dark"
+ * layout; this dashboard is a warm-light editorial surface unconditionally).
+ *
+ *   --linen  #FFF2E1  page background
+ *   --cream  #EAD8C0  card / panel / sidebar backgrounds
+ *   --sand   #D1BB9E  secondary highlights, active borders, dividers
+ *   --brown  #A79277  primary accent -- buttons, active tabs
+ *   --espresso #3E2D1C  the only text color family (readability guardrail)
+ *
+ * Text hierarchy (primary/secondary/muted) is the same espresso hue at
+ * different opacities rather than introducing new hues, so every label
+ * stays inside the "guaranteed readable" color instead of drifting toward
+ * light gold/white. Chart components (lib/colors.ts) mirror these values as
+ * literal strings, since Leaflet/xyflow render onto canvas/SVG and can't
+ * read CSS custom properties.
  */
 :root {
-  --surface-1: #fcfcfb;
-  --page-plane: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --baseline: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
+  --linen: #fff2e1;
+  --cream: #ead8c0;
+  --sand: #d1bb9e;
+  --brown: #a79277;
+  --espresso: #3e2d1c;
 
-  --series-1: #2a78d6; /* blue */
-  --series-2: #1baf7a; /* aqua */
-  --series-3: #eda100; /* yellow */
-  --series-4: #008300; /* green */
-  --series-5: #4a3aa7; /* violet */
-  --series-6: #e34948; /* red */
-  --series-7: #e87ba4; /* magenta */
-  --series-8: #eb6834; /* orange */
+  --surface-1: var(--cream); /* card / panel / sidebar background */
+  --surface-2: var(--sand); /* secondary highlight background */
+  --page-plane: var(--linen);
+  --text-primary: var(--espresso);
+  --text-secondary: rgba(62, 45, 28, 0.72);
+  --text-muted: rgba(62, 45, 28, 0.52);
+  --gridline: var(--sand);
+  --baseline: var(--sand);
+  --border: var(--sand);
+  --card-shadow: 0 1px 3px rgba(62, 45, 28, 0.12), 0 1px 2px rgba(62, 45, 28, 0.07);
 
-  --status-good: #0ca30c;
-  --status-warning: #fab219;
-  --status-serious: #ec835a;
-  --status-critical: #d03b3b;
-}
+  /* Buttons / active tabs: muted-brown fill with espresso text -- not white
+     or light gold, so button labels stay inside the readability guardrail
+     even though the fill itself is mid-toned. */
+  --accent: var(--brown);
+  --accent-hover: color-mix(in srgb, var(--brown), var(--espresso) 22%);
+  --accent-contrast: var(--espresso);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface-1: #1a1a19;
-    --page-plane: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --baseline: #383835;
-    --border: rgba(255, 255, 255, 0.1);
+  /* Five department accents (Logistics/Medical/Comms/Finance/SAR) for the
+     Conflict Graph Explorer and ledger proposal borders -- a categorical
+     distinction the four core roles above don't cover on their own, so
+     these few are derived tints within the same warm family rather than
+     reintroducing saturated primaries. */
+  --series-1: #3e2d1c; /* espresso        -- logistics */
+  --series-2: #9c4a2c; /* muted rust      -- medical   */
+  --series-3: #71713a; /* muted olive     -- comms     */
+  --series-4: #8a6023; /* muted ochre     -- finance   */
+  --series-5: #7a5f3f; /* tan bronze      -- sar       */
 
-    --series-1: #3987e5;
-    --series-2: #199e70;
-    --series-3: #c98500;
-    --series-4: #008300;
-    --series-5: #9085e9;
-    --series-6: #e66767;
-    --series-7: #d55181;
-    --series-8: #d95926;
-  }
+  --status-good: #6b7a3a;
+  --status-warning: #c98a2c;
+  --status-serious: #b5622b;
+  --status-critical: #8c3b2e;
+
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 @theme inline {
   --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
   --color-page-plane: var(--page-plane);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
@@ -66,10 +78,36 @@
   --color-status-warning: var(--status-warning);
   --color-status-serious: var(--status-serious);
   --color-status-critical: var(--status-critical);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-contrast: var(--accent-contrast);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
 }
 
 body {
   background: var(--page-plane);
   color: var(--text-primary);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
+}
+
+.card-panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+}
+
+/* Tone the OpenStreetMap raster tiles toward the warm palette. The filter
+   desaturates and warms the tiles themselves; the overlay div (rendered by
+   DisasterMap.tsx on top of the tile pane, below markers) adds a flat
+   warm-beige cast so the map's natural greens/blues read as part of the
+   same palette rather than fighting it. */
+.map-sepia .leaflet-tile {
+  filter: sepia(0.55) saturate(0.45) brightness(1.08) hue-rotate(-6deg);
+}
+
+.map-sepia .leaflet-popup-content-wrapper,
+.map-sepia .leaflet-popup-tip {
+  background: var(--surface-1);
+  color: var(--text-primary);
 }

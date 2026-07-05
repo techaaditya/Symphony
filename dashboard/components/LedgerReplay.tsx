@@ -19,7 +19,7 @@ export default function LedgerReplay({ entries, mode }: LedgerReplayProps) {
 
   if (entries.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center rounded-lg border border-border bg-surface-1 text-sm text-text-muted">
+      <div className="card-panel flex h-40 items-center justify-center rounded-lg text-sm text-text-muted">
         No ledger entries yet.
       </div>
     );
@@ -56,22 +56,24 @@ function SingleAgentDetail({ entry }: { entry: LedgerEntry }) {
   if (isDeliberationRound(entry)) return null;
   const committed = entry.committed;
   return (
-    <div className="rounded-lg border border-border bg-surface-1 p-4 text-sm">
-      <h3 className="mb-2 font-semibold text-text-primary">Generalist decision</h3>
+    <div className="card-panel rounded-lg p-4 text-sm">
+      <h3 className="mb-2 font-serif text-base font-semibold text-text-primary">
+        Generalist decision
+      </h3>
       {committed ? (
-        <ul className="space-y-1 text-text-secondary">
-          <li>
-            <span className="text-text-muted">Action:</span> {committed.action}
+        <ul className="divide-y divide-border text-text-secondary">
+          <li className="flex justify-between py-1.5">
+            <span className="text-text-muted">Action</span> {committed.action}
           </li>
-          <li>
-            <span className="text-text-muted">Target resource:</span>{" "}
+          <li className="flex justify-between py-1.5">
+            <span className="text-text-muted">Target resource</span>
             {committed.target_resource ?? "—"}
           </li>
-          <li>
-            <span className="text-text-muted">Cost:</span> {committed.cost}
+          <li className="flex justify-between py-1.5">
+            <span className="text-text-muted">Cost</span> {committed.cost}
           </li>
-          <li>
-            <span className="text-text-muted">Served:</span>{" "}
+          <li className="flex justify-between py-1.5">
+            <span className="text-text-muted">Served</span>
             {committed.served === null ? "unjudged" : committed.served ? "yes" : "wasted"}
           </li>
         </ul>
@@ -98,7 +100,7 @@ function DeliberationDetail({
           {round.proposals.map((p) => (
             <li
               key={p.agent}
-              className="rounded-md border border-border bg-surface-1 p-3 text-sm"
+              className="rounded-md border border-border bg-page-plane p-3 text-sm"
               style={{ borderLeftColor: agentColor(palette, p.agent), borderLeftWidth: 3 }}
             >
               <p className="font-medium capitalize text-text-primary">
@@ -124,9 +126,12 @@ function DeliberationDetail({
 
       {conflictedResources.length > 0 && (
         <Section title={`Conflicts (${conflictedResources.length})`}>
-          <ul className="space-y-1 text-sm text-text-secondary">
-            {conflictedResources.map((resource) => (
-              <li key={resource}>
+          <ul className="divide-y divide-border overflow-hidden rounded-md border border-border text-sm text-text-secondary">
+            {conflictedResources.map((resource, i) => (
+              <li
+                key={resource}
+                className={`px-3 py-2 ${i % 2 === 1 ? "bg-page-plane" : "bg-surface-1"}`}
+              >
                 <span className="font-medium text-text-primary">{resource}</span>:{" "}
                 {round.conflicts[resource].map((p) => p.agent).join(" vs. ")}
               </li>
@@ -139,7 +144,7 @@ function DeliberationDetail({
         <Section title="Debate transcript">
           <ul className="space-y-2 text-sm">
             {round.debate_log.map((entry, i) => (
-              <li key={i} className="rounded-md border border-border bg-surface-1 p-3">
+              <li key={i} className="rounded-md border border-border bg-page-plane p-3">
                 <p className="text-xs text-text-muted">
                   {entry.resource} · round {entry.round}
                 </p>
@@ -159,9 +164,12 @@ function DeliberationDetail({
 
       {Object.keys(round.votes).length > 0 && (
         <Section title="Votes">
-          <ul className="space-y-1 text-sm text-text-secondary">
-            {Object.entries(round.votes).map(([resource, tally]) => (
-              <li key={resource}>
+          <ul className="divide-y divide-border overflow-hidden rounded-md border border-border text-sm text-text-secondary">
+            {Object.entries(round.votes).map(([resource, tally], i) => (
+              <li
+                key={resource}
+                className={`px-3 py-2 ${i % 2 === 1 ? "bg-page-plane" : "bg-surface-1"}`}
+              >
                 <span className="font-medium text-text-primary">{resource}</span>:{" "}
                 {Object.entries(tally)
                   .sort((a, b) => b[1] - a[1])
@@ -179,13 +187,18 @@ function DeliberationDetail({
       )}
 
       <Section title="Outcome">
-        <div className="flex flex-col gap-2 text-sm">
+        <div className="flex flex-col gap-3 text-sm">
           {round.outcome.committed.length > 0 && (
             <div>
-              <p className="text-text-muted">Committed</p>
-              <ul className="text-text-secondary">
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">
+                Committed
+              </p>
+              <ul className="divide-y divide-border overflow-hidden rounded-md border border-border text-text-secondary">
                 {round.outcome.committed.map((c, i) => (
-                  <li key={i}>
+                  <li
+                    key={i}
+                    className={`px-3 py-1.5 ${i % 2 === 1 ? "bg-page-plane" : "bg-surface-1"}`}
+                  >
                     <span className="text-status-good">✓</span> {c.agent} — {c.action} (
                     {c.target_resource ?? "no resource"})
                   </li>
@@ -195,10 +208,15 @@ function DeliberationDetail({
           )}
           {round.outcome.vetoed.length > 0 && (
             <div>
-              <p className="text-text-muted">Vetoed</p>
-              <ul className="text-text-secondary">
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-text-muted">
+                Vetoed
+              </p>
+              <ul className="divide-y divide-border overflow-hidden rounded-md border border-border text-text-secondary">
                 {round.outcome.vetoed.map((v, i) => (
-                  <li key={i}>
+                  <li
+                    key={i}
+                    className={`px-3 py-1.5 ${i % 2 === 1 ? "bg-page-plane" : "bg-surface-1"}`}
+                  >
                     <span className="text-status-critical">✕</span> {v.agent} —{" "}
                     {v.target_resource} ({v.reason})
                   </li>
@@ -220,7 +238,7 @@ function DeliberationDetail({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="mb-2 text-sm font-semibold text-text-primary">{title}</h3>
+      <h3 className="mb-2 font-serif text-base font-semibold text-text-primary">{title}</h3>
       {children}
     </div>
   );

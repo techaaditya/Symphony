@@ -28,7 +28,7 @@ export default function BenchmarkPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold text-text-primary">Benchmark</h1>
+        <h1 className="font-serif text-2xl font-semibold text-text-primary">Benchmark</h1>
         <label className="flex items-center gap-2 text-sm text-text-secondary">
           Seed
           <input
@@ -52,7 +52,7 @@ export default function BenchmarkPage() {
         <button
           onClick={handleRun}
           disabled={loading}
-          className="rounded-md bg-text-primary px-3 py-1.5 text-sm font-medium text-page-plane disabled:opacity-40"
+          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-contrast transition-all duration-200 hover:bg-accent-hover disabled:opacity-40"
         >
           {loading ? "Running…" : "Run comparison"}
         </button>
@@ -62,7 +62,7 @@ export default function BenchmarkPage() {
       {result ? (
         <BenchmarkChart result={result} />
       ) : (
-        <div className="flex h-40 items-center justify-center rounded-lg border border-border bg-surface-1 text-sm text-text-muted">
+        <div className="card-panel flex h-40 items-center justify-center rounded-lg text-sm text-text-muted">
           Run a comparison to see society vs single-agent metrics.
         </div>
       )}

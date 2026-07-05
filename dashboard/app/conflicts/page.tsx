@@ -42,11 +42,11 @@ export default function ConflictsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold text-text-primary">Conflicts</h1>
+        <h1 className="font-serif text-2xl font-semibold text-text-primary">Conflicts</h1>
         <button
           onClick={handleStart}
           disabled={starting || (!!simId && !stream.finished)}
-          className="rounded-md bg-text-primary px-3 py-1.5 text-sm font-medium text-page-plane disabled:opacity-40"
+          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-contrast transition-all duration-200 hover:bg-accent-hover disabled:opacity-40"
         >
           {simId && !stream.finished ? "Running…" : "Run scenario"}
         </button>

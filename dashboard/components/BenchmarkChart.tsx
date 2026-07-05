@@ -55,8 +55,10 @@ export default function BenchmarkChart({ result }: BenchmarkChartProps) {
         ))}
       </div>
 
-      <div className="rounded-lg border border-border bg-surface-1 p-4">
-        <h3 className="mb-1 text-sm font-semibold text-text-primary">Token-cost tradeoff</h3>
+      <div className="card-panel rounded-lg p-4">
+        <h3 className="mb-1 font-serif text-base font-semibold text-text-primary">
+          Token-cost tradeoff
+        </h3>
         <p className="text-sm text-text-secondary">
           The five-agent society spends{" "}
           <span
@@ -103,10 +105,10 @@ function MetricPanel({
   const scale = (v: number) => (v / maxValue) * (baselineY - 20);
 
   return (
-    <div className="rounded-lg border border-border bg-surface-1 p-4">
+    <div className="card-panel rounded-lg p-4">
       <h3 className="mb-2 text-sm font-medium text-text-secondary">{metric.label}</h3>
       <svg width={width} height={height} role="img" aria-label={`${metric.label} comparison chart`}>
-        <line x1={10} y1={baselineY} x2={width - 10} y2={baselineY} stroke={palette.gridline} strokeWidth={1} />
+        <line x1={10} y1={baselineY} x2={width - 10} y2={baselineY} stroke={palette.textPrimary} strokeWidth={1} />
         {MODE_ORDER.map((mode, i) => {
           const summary = result[mode][metric.key];
           const barHeight = scale(summary.mean);
@@ -137,7 +139,7 @@ function MetricPanel({
                 y={Math.min(baselineY - barHeight, errTop) - 8}
                 textAnchor="middle"
                 fontSize={11}
-                fill={palette.textSecondary}
+                fill={palette.textPrimary}
               >
                 {metric.formatValue(summary.mean)}
               </text>

@@ -24,7 +24,7 @@ export default function ConflictGraph({ graph, focusAgent }: ConflictGraphProps)
 
   if (!graph || graph.proposals.length === 0) {
     return (
-      <div className="flex h-[480px] items-center justify-center rounded-lg border border-border bg-surface-1 text-sm text-text-muted">
+      <div className="card-panel flex h-[480px] items-center justify-center rounded-lg text-sm text-text-muted">
         No recorded conflicts for this agent yet.
       </div>
     );
@@ -46,12 +46,14 @@ export default function ConflictGraph({ graph, focusAgent }: ConflictGraphProps)
       data: { label: `${proposal.agent} · t${proposal.tick}` },
       style: {
         background: proposal.agent === focusAgent ? color : palette.surface,
-        color: proposal.agent === focusAgent ? "#ffffff" : palette.textSecondary,
-        border: `2px solid ${color}`,
-        borderRadius: 8,
+        color: proposal.agent === focusAgent ? "#fff8ef" : palette.textSecondary,
+        border: `1.5px solid ${color}`,
+        borderRadius: 6,
         fontSize: 11,
+        fontWeight: 500,
         width: 110,
         textTransform: "capitalize",
+        boxShadow: "0 1px 2px rgba(101, 69, 31, 0.08)",
       },
     };
   });
@@ -64,13 +66,13 @@ export default function ConflictGraph({ graph, focusAgent }: ConflictGraphProps)
       target: edge.target,
       label: `${edge.resource} · ${edge.outcome}`,
       animated: edge.outcome === "unresolved",
-      style: { stroke: color, strokeWidth: 2 },
+      style: { stroke: color, strokeWidth: 1.75 },
       labelStyle: { fill: palette.textSecondary, fontSize: 10 },
     };
   });
 
   return (
-    <div className="h-[480px] overflow-hidden rounded-lg border border-border bg-surface-1">
+    <div className="card-panel h-[480px] overflow-hidden rounded-lg">
       <ReactFlow
         nodes={nodes}
         edges={edges}

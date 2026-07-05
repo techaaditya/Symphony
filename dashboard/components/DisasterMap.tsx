@@ -30,7 +30,7 @@ export default function DisasterMap({ worldState }: DisasterMapProps) {
 
   if (!worldState) {
     return (
-      <div className="flex h-[480px] items-center justify-center rounded-lg border border-border bg-surface-1 text-sm text-text-muted">
+      <div className="card-panel flex h-[480px] items-center justify-center rounded-lg text-sm text-text-muted">
         Start a simulation to see the live map.
       </div>
     );
@@ -49,8 +49,22 @@ export default function DisasterMap({ worldState }: DisasterMapProps) {
   const towersByZone = groupBy(Object.values(worldState.towers), (t) => t.zone_id);
 
   return (
-    <div className="h-[480px] overflow-hidden rounded-lg border border-border">
-      <MapContainer center={center} zoom={11} className="h-full w-full" scrollWheelZoom>
+    <div className="card-panel relative h-[480px] overflow-hidden rounded-lg">
+      {/* Flat warm-beige cast over the whole map (tiles + markers), on top of
+          the per-tile CSS filter below -- a filter alone still lets raw
+          OSM greens/blues show through on some tile sets; this multiply
+          overlay guarantees the map reads as part of the same palette.
+          pointer-events-none so pan/zoom/click still reach the map underneath. */}
+      <div
+        className="pointer-events-none absolute inset-0 z-1000"
+        style={{ background: "rgba(209, 187, 158, 0.22)", mixBlendMode: "multiply" }}
+      />
+      <MapContainer
+        center={center}
+        zoom={11}
+        className="map-sepia h-full w-full"
+        scrollWheelZoom
+      >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

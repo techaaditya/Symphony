@@ -2,9 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import AgentGraph from "@/components/AgentGraph";
+import CollaborativeGrid from "@/components/CollaborativeGrid";
 import { startSim } from "@/lib/api";
-import { AGENT_ORDER, agentColor, useThemePalette } from "@/lib/colors";
 import { useSimStream } from "@/hooks/useSimStream";
 import type { SimMode } from "@/lib/types";
 
@@ -17,7 +16,6 @@ export default function LivePage() {
   const [mode, setMode] = useState<SimMode>("society");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const palette = useThemePalette();
 
   const stream = useSimStream(simId, 400);
 
@@ -39,7 +37,7 @@ export default function LivePage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold text-text-primary">Live</h1>
+        <h1 className="font-serif text-2xl font-semibold text-text-primary">Live</h1>
         <select
           value={mode}
           onChange={(e) => setMode(e.target.value as SimMode)}
@@ -52,7 +50,7 @@ export default function LivePage() {
         <button
           onClick={handleStart}
           disabled={starting || (!!simId && !stream.finished)}
-          className="rounded-md bg-text-primary px-3 py-1.5 text-sm font-medium text-page-plane disabled:opacity-40"
+          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-accent-contrast transition-all duration-200 hover:bg-accent-hover disabled:opacity-40"
         >
           {simId && !stream.finished ? "Running…" : "Start scenario"}
         </button>
@@ -71,21 +69,8 @@ export default function LivePage() {
           <DisasterMap worldState={worldState} />
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-text-secondary">Agent graph</h2>
-          <AgentGraph latest={stream.latest} />
-          {mode === "society" && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
-              {AGENT_ORDER.map((agent) => (
-                <span key={agent} className="flex items-center gap-1.5 text-xs text-text-secondary">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ background: agentColor(palette, agent) }}
-                  />
-                  <span className="capitalize">{agent}</span>
-                </span>
-              ))}
-            </div>
-          )}
+          <h2 className="text-sm font-medium text-text-secondary">Command matrix</h2>
+          <CollaborativeGrid latest={stream.latest} />
         </div>
       </div>
     </div>
