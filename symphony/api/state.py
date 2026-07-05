@@ -18,9 +18,14 @@ from typing import Any
 
 from symphony.benchmark.run_benchmark import build_society
 from symphony.benchmark.single_agent_baseline import SingleAgentBaseline
+from symphony.config import get_config
 from symphony.llm.provider import get_provider
 from symphony.models import BlackboardState, RoundResult
-from symphony.protocol.conflict_graph import JsonConflictGraphWriter
+from symphony.protocol.conflict_graph import (
+    ConflictGraphWriter,
+    JsonConflictGraphWriter,
+    get_conflict_graph_writer,
+)
 from symphony.protocol.parliament import ParliamentProtocol
 from symphony.simulator.engine import Simulator, load_scenario
 
@@ -34,7 +39,7 @@ class SimSession:
     seed: int
     mode: str
     sim: Simulator
-    conflict_graph: JsonConflictGraphWriter
+    conflict_graph: ConflictGraphWriter
     protocol: ParliamentProtocol | None = None
     baseline: SingleAgentBaseline | None = None
     baseline_log: list[dict[str, Any]] = field(default_factory=list)
@@ -118,7 +123,15 @@ def create_session(scenario_id: str, seed: int, mode: str) -> SimSession:
     sim = load_scenario(scenario_id, seed)
 
     session_dir = Path(tempfile.mkdtemp(prefix=f"symphony-{sim_id}-"))
-    conflict_graph = JsonConflictGraphWriter(session_dir / "conflicts.json")
+    conflict_graph_config = get_config().conflict_graph
+    conflict_graph: ConflictGraphWriter
+    if conflict_graph_config.backend == "neo4j":
+        # Shared, process-wide Neo4j writer (real backend, doc §8) -- unlike
+        # the JSON default there's no per-session isolation, since the graph
+        # is one shared database rather than a file this session owns.
+        conflict_graph = get_conflict_graph_writer(conflict_graph_config)
+    else:
+        conflict_graph = JsonConflictGraphWriter(session_dir / "conflicts.json")
 
     protocol: ParliamentProtocol | None = None
     baseline: SingleAgentBaseline | None = None

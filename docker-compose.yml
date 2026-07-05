@@ -26,6 +26,13 @@ services:
 
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+    # Two listeners: `internal` is what other containers (the `api` service)
+    # use to reach Redpanda by its Docker-network hostname; `external` is what
+    # host-run tools (`make seed`, scripts/demo_run.py without --host) use --
+    # a single PLAINTEXT://redpanda:9092 listener would advertise a hostname
+    # that only resolves inside the compose network, so any host client's
+    # metadata lookup would resolve back to an address it can't reach and
+    # time out.
     command:
       - redpanda
       - start
@@ -34,10 +41,11 @@ services:
       - --overprovisioned
       - --node-id=0
       - --check=false
-      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
-      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
     ports:
       - "9092:9092"
+      - "19092:19092"
     healthcheck:
       test: ["CMD", "rpk", "cluster", "health"]
       interval: 5s
