@@ -46,10 +46,18 @@ the commit tick through `mark_served` so a late rescue can be scored differently
 larger change than this submission's timeline allowed for. Left as documented future work rather
 than silently shipped as if the number already accounts for it.
 
-**I did not run a real Alibaba Cloud deployment myself.** `infra/alibaba-cloud/terraform/` is
-validated for real against the live `alicloud` Terraform provider (`terraform fmt`/`validate`/
-`plan` all run against real provider schemas — this caught and fixed a real Tablestore
-instance-name-length bug), but I have no Alibaba Cloud credentials and did not run
-`terraform apply`. The deployment-proof recording called for in `infra/alibaba-cloud/
-deployment-proof-checklist.md` is genuinely operator-run, not something I can claim to have already
-done.
+**The real deployment ended up smaller in scope than the Terraform, for an honest reason.**
+`infra/alibaba-cloud/terraform/` is validated for real against the live `alicloud` Terraform
+provider (`terraform fmt`/`validate`/`plan` all run against real provider schemas — this caught and
+fixed a real Tablestore instance-name-length bug), but running it needs an Alibaba Cloud AccessKey
+and a bound payment method arranged well ahead of a deadline — the operator (not me) hit a real
+blocker getting a payment method verified in time. Rather than let that block the submission
+entirely, we deployed a smaller but still fully genuine proof: one ECS instance, created manually
+via the console, running the actual Symphony API as a systemd service with `SYMPHONY_LLM=qwen` and
+a real DashScope key — bus/blackboard/conflict-graph stayed on their zero-config local defaults for
+this proof. I verified it was genuinely live (not silently falling back to the mock provider) by
+reading the *actual running process's* environment via `/proc/<pid>/environ` rather than trusting a
+config file, and by timing a real `POST /sim/tick` call at ~3 seconds — consistent with a real
+DashScope round-trip, versus the mock provider's millisecond response. Evidence and the full
+reasoning are in `infra/alibaba-cloud/deployment-proof-checklist.md`. The Tablestore/Kafka/Neo4j
+portion of the Terraform remains validated-but-unapplied, same as before.

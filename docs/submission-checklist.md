@@ -7,9 +7,12 @@ buildable in code is done.
 - [x] Public repo, visible OSS LICENSE at top of repo page — [`LICENSE`](../LICENSE) (MIT).
 - [x] Full source, scenario data, setup instructions — see the [README](../README.md)'s Quickstart;
       `symphony/simulator/scenarios/wildfire_v3.json` is the only scenario, committed in full.
-- [ ] Separate Alibaba Cloud deployment proof recording, linked to specific code/config —
-      infrastructure and checklist are ready (`infra/alibaba-cloud/`), recording itself is
-      operator-run against a real account (see `docs/self-audit.md`'s honest note on this).
+- [x] Separate Alibaba Cloud deployment proof recording, linked to specific code/config —
+      [`infra/alibaba-cloud/proof/deployment-proof-recording.mp4`](../infra/alibaba-cloud/proof/deployment-proof-recording.mp4),
+      screenshots and full details in
+      [`infra/alibaba-cloud/deployment-proof-checklist.md`](../infra/alibaba-cloud/deployment-proof-checklist.md).
+      Code file: [`symphony/config.py`](../symphony/config.py#L35) (DashScope base URL), used by
+      [`symphony/llm/provider.py`](../symphony/llm/provider.py)'s `QwenProvider`.
 - [x] Architecture diagram in README — [`docs/architecture.md`](architecture.md), linked from the
       README's Architecture section.
 - [ ] ~3-minute public demo video — storyboard and voiceover ready
@@ -30,8 +33,12 @@ buildable in code is done.
 
 ## What's left, concretely
 
-1. Run `infra/alibaba-cloud/DEPLOY_RUNBOOK.md` against a real Alibaba Cloud account, then record
-   the deployment-proof video per `infra/alibaba-cloud/deployment-proof-checklist.md`.
-2. Record the ~3-minute feature demo per `docs/demo-script.md`, using `scripts/demo_run.py` to
-   drive the scenario at a narratable pace.
-3. Submit both video links alongside this repo on the hackathon submission form.
+1. Record the ~3-minute feature demo per `docs/demo-script.md`, using `scripts/demo_run.py` to
+   drive the scenario at a narratable pace — run against the local `docker-compose.yml` stack, not
+   the Alibaba Cloud instance (that instance can be released once the deployment proof is
+   submitted; the feature demo doesn't depend on it).
+2. Submit the feature demo video, the deployment-proof recording (already committed at
+   `infra/alibaba-cloud/proof/`), and the code-file link alongside this repo on the hackathon
+   submission form.
+3. Release the ECS instance (`i-t4niew2qfik209oghsav`) once the submission is in, so it stops
+   billing against the hackathon voucher.
