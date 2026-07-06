@@ -8,16 +8,16 @@
       "sd": 0.0
     },
     "time_to_allocate_s": {
-      "mean": 0.0047,
-      "sd": 0.0005
+      "mean": 0.0055,
+      "sd": 0.0017
     },
     "resource_waste_pct": {
       "mean": 0.0,
       "sd": 0.0
     },
     "token_cost": {
-      "mean": 9399.35,
-      "sd": 1.4609
+      "mean": 9398.65,
+      "sd": 1.268
     }
   },
   "society": {
@@ -25,20 +25,20 @@
     "scenario_id": "wildfire_v3",
     "n_trials": 20,
     "objectives_met_pct": {
-      "mean": 63.64,
+      "mean": 54.55,
       "sd": 0.0
     },
     "time_to_allocate_s": {
-      "mean": 0.0655,
-      "sd": 0.0064
+      "mean": 0.0782,
+      "sd": 0.0184
     },
     "resource_waste_pct": {
       "mean": 0.0,
       "sd": 0.0
     },
     "token_cost": {
-      "mean": 247095.15,
-      "sd": 28.592
+      "mean": 252382.5,
+      "sd": 35.4186
     }
   },
   "scenario_id": "wildfire_v3",

@@ -1,69 +1,101 @@
-# Demo video script (~3:00)
+# Demo video script (~3 minutes)
 
-Storyboard and voiceover, adapted from the design doc §18 with the placeholders filled in by real
-output from `scripts/demo_run.py --scenario wildfire_v3 --seed 42` against the local
-`docker-compose.yml` stack. Record the dashboard's **Live**, **Ledger**, **Conflicts**, and
-**Benchmark** views in that order — the same order the voiceover below expects.
+Plain-language voiceover with on-screen directions. Record the dashboard views in this order:
+**Live → Ledger → Conflicts → Benchmark**. Everything shown is a real seeded run
+(`wildfire_v3`, seed 42) — no mockups.
 
-## Before recording
+## Before you record
 
 ```bash
 make up                      # local stack: neo4j, redpanda, api, dashboard
-python scripts/demo_run.py   # drives the actual scenario used below, at demo pace
+python scripts/demo_run.py   # drives the scenario at a narratable pace
 ```
 
-Open `http://localhost:3000/live` in the browser *before* running `demo_run.py`, so the map and
-agent graph are already on screen when ticks start arriving.
+Open <http://localhost:3000/live> in the browser *before* you start `demo_run.py`, so the map and
+command matrix are on screen when the ticks begin.
 
-## Storyboard
+---
 
-**(0:00–0:20)** *(show the disaster map, both zones visible, fire intensity still low)*
+## The script
 
-> "Crisis response needs specialists negotiating in real time — not one generalist guessing
-> alone. Here's a wildfire unfolding across two zones."
+### 0:00 – 0:20 · The problem
 
-**(0:20–0:50)** *(agent graph lighting up as ticks 1-3 commit without conflict)*
+*(On screen: the Live view, disaster map with two zones, fire just starting.)*
 
-> "Five agents — Logistics, Medical, Comms, Finance, Search and Rescue — each with their own
-> objective, start proposing actions the moment the fire spreads."
+> "A wildfire is spreading across two districts. There are more emergencies than there are
+> helicopters, medics, and money to go around. Normally you'd hand this to one AI assistant and hope
+> it makes good calls. But one assistant can't be an expert in everything at once — and it can't show
+> you *why* it chose what it chose. So we didn't build one assistant. We built five, and gave them a
+> way to argue."
 
-**(0:50–1:35)** *(switch to Ledger view, scrub to tick 10)*
+### 0:20 – 0:45 · Meet the society
 
-> "Watch this: at tick 10, casualties just came in at zone two, critical severity. Medical wants
-> the helicopter. Logistics wants it to fight the fire instead — and Search and Rescue wants it
-> for a trapped-persons window that's about to close. That's a real three-way conflict. Watch the
-> debate resolve it: Medical's rebuttal scores highest with the two neutral agents, wins the
-> weighted vote outright, no escalation needed."
+*(On screen: the Command Matrix — five department cards: Logistics, Medical, Comms, Finance, Search
+& Rescue. Click "Start scenario." The map begins updating.)*
 
-**(1:35–2:05)** *(stay in Ledger view, scrub to tick 15)*
+> "Meet the team. Logistics moves vehicles and aircraft. Medical handles casualties. Search and
+> Rescue reaches trapped people. Comms keeps the towers up. And Finance guards the budget. Each one
+> is a specialist — it only proposes actions in its own lane. Watch what happens when the fire
+> forces them to compete."
 
-> "Five ticks later, it's not so clean. Logistics and Medical are close enough that it escalates
-> to the Coordinator, who has to actually cite the debate transcript in its ruling, not just
-> guess — and rules for Medical. But watch: Finance already flagged that the budget crossed its
-> safety ceiling this same tick. The veto overrides the Coordinator's own ruling. That's the
-> second, genuinely distinct conflict-resolution mechanism — a vote can be won and still not
-> committed."
+### 0:45 – 1:25 · A conflict, resolved in the open
 
-**(2:05–2:30)** *(switch to Conflicts view, focus agent = logistics)*
+*(On screen: switch to Ledger, scrub to tick 10.)*
 
-> "Every conflict this entire scenario is explorable as a graph — here's every time Logistics
-> clashed over the helicopter, across the full run, tick by tick."
+> "Here at step ten, there's exactly one helicopter left, and three agents want it. Logistics wants
+> it to fight the fire. Medical wants it for eight critical casualties. Search and Rescue wants it
+> for people trapped with minutes left. That's a real three-way conflict."
 
-**(2:30–2:55)** *(switch to Benchmark view, run the n=20 comparison live or show the pre-run chart)*
+*(Point at the debate transcript and the vote.)*
 
-> "And here's the actual measured result: twenty trials each, five-agent society against a single
-> generalist agent, identical scenario and seeds. The society doesn't just win — it resolves
-> two-thirds of the objectives because Finance's veto is actually protecting the budget, something
-> the single generalist never does at all. That costs completed objectives, and it costs about
-> twenty-six times the tokens. That's the honest tradeoff, not a cherry-picked one."
+> "So the society debates. The two agents with no stake — Comms and Finance — score how convincing
+> each side is. Those scores become a weighted vote, and Medical's case wins outright. No human
+> stepped in. The decision, and the reasoning behind it, is written down."
 
-**(2:55–3:00)** *(architecture diagram from `docs/architecture.md`, close)*
+### 1:25 – 2:05 · A vote can be won — and still refused
 
-> "Deployed on Alibaba Cloud. One rule underneath all of it: agents propose, deterministic code
-> adjudicates."
+*(On screen: scrub to tick 13.)*
+
+> "A few steps later, it gets more interesting. The budget is down to thirty-six thousand dollars.
+> Logistics and Search and Rescue tie so closely the society can't settle it, so it escalates to a
+> Coordinator, who reads the transcript and rules for Search and Rescue."
+
+*(Point at the veto line.)*
+
+> "But Finance had already raised a flag: there isn't enough money left to safely put another
+> helicopter in the air. So the veto overrides the ruling. Search and Rescue *won the vote* — and
+> still doesn't get the helicopter, because the society can't afford it. That's the whole idea: being
+> right isn't the same as being affordable, and the system keeps those two things separate."
+
+### 2:05 – 2:25 · Every disagreement, on the record
+
+*(On screen: switch to Conflicts, focus agent = Logistics.)*
+
+> "And none of this is a black box. Every clash across the whole run is here as a graph — every time
+> Logistics fought over that helicopter, who it was against, and how it ended. A supervisor can audit
+> the entire crisis after the fact."
+
+### 2:25 – 2:50 · Does the society actually do better?
+
+*(On screen: switch to Benchmark, run the comparison.)*
+
+> "Now the honest question — is five agents actually better than one? We ran both, twenty times.
+> The single agent looks perfect: it completes every objective. But it only does that by spending
+> thirty-five thousand dollars it doesn't have — every single trial. In the real world, that's
+> grounded aircraft and unpaid crews. The society completes fewer objectives, but it finishes inside
+> the budget every single time. It's the only one whose plan you could actually carry out."
+
+### 2:50 – 3:00 · Close
+
+*(On screen: architecture diagram, or back to the map.)*
+
+> "Five specialists, one auditable process, running on Alibaba Cloud with Qwen. One rule underneath
+> all of it: the agents propose, and deterministic code decides. That's Symphony."
+
+---
 
 ## After recording
 
-Record the separate Alibaba Cloud deployment-proof video per
-[`infra/alibaba-cloud/deployment-proof-checklist.md`](../infra/alibaba-cloud/deployment-proof-checklist.md)
-— it is **not** part of this ~3-minute feature demo.
+Record the separate Alibaba Cloud deployment-proof clip per
+[`../infra/alibaba-cloud/deployment-proof-checklist.md`](../infra/alibaba-cloud/deployment-proof-checklist.md).
+It is **not** part of this ~3-minute demo.
