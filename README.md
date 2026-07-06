@@ -242,9 +242,6 @@ pointing at what was actually said in the debate.
 
 ## Architecture
 
-Full system diagram, the adapter pattern, and the Alibaba Cloud deployment topology are in
-[`docs/architecture.md`](docs/architecture.md). At a glance:
-
 ```text
 Simulator ──events──▶ Event bus (in-memory / ApsaraMQ-Kafka)
     │
@@ -287,9 +284,8 @@ symphony/
 │   ├── benchmark/                # harness + committed results
 │   └── api/                      # FastAPI server + SSE stream
 ├── dashboard/                    # Next.js: map, command matrix, ledger, conflicts, benchmark
-├── infra/alibaba-cloud/          # Terraform, deploy runbook, deployment-proof evidence
+├── infra/alibaba-cloud/          # Terraform + bootstrap/health scripts for the real deploy
 ├── scripts/                      # demo driver, budget-adherence measurement
-├── docs/                         # architecture diagram + notes
 ├── docker-compose.yml            # local Neo4j + Redpanda + api + dashboard
 └── tests/                        # 87 tests, mock LLM, zero network
 ```
@@ -299,12 +295,9 @@ symphony/
 ## Proof of Alibaba Cloud deployment
 
 The backend was deployed and run on an Alibaba Cloud ECS instance using live Qwen (DashScope). The
-evidence and the exact scope are in
-[`infra/alibaba-cloud/deployment-proof-checklist.md`](infra/alibaba-cloud/deployment-proof-checklist.md),
-with the screen recording and Workbench screenshots in
-[`infra/alibaba-cloud/proof/`](infra/alibaba-cloud/proof/). The code that talks to Alibaba Cloud is
-[`symphony/llm/provider.py`](symphony/llm/provider.py) — `QwenProvider` calls DashScope's
-OpenAI-compatible endpoint, selected by `symphony/config.py`.
+recording and Workbench screenshots are provided with the hackathon submission. The code that talks
+to Alibaba Cloud is [`symphony/llm/provider.py`](symphony/llm/provider.py) — `QwenProvider` calls
+DashScope's OpenAI-compatible endpoint, selected by `symphony/config.py`.
 
 ---
 

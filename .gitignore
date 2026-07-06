@@ -50,13 +50,18 @@ Thumbs.db
 .claude/
 
 # Personal / submission working docs — kept locally, not published to the repo.
-# These support the submission (video script, self-audit, form copy, blog draft,
-# diagram render) but aren't part of the shipped project.
+# The whole docs/ folder is submission-prep material (video script, self-audit,
+# form copy, blog draft, architecture diagram renders), not shipped project docs.
 /Symphony_Agent_Society_Documentation_FINAL_QwenCloud.md
-docs/demo-script.md
-docs/self-audit.md
-docs/submission-checklist.md
-docs/submission-form.md
-docs/blog-post.md
-docs/architecture-diagram.html
-docs/architecture-diagram.png
+/docs/
+
+# Agent-instruction files — for local AI-assisted development only.
+CLAUDE.md
+AGENTS.md
+
+# Alibaba Cloud deployment write-ups and proof media — personal/submission
+# assets uploaded directly to the hackathon form, not shipped project source.
+# The actual IaC (terraform/, scripts/) stays tracked.
+infra/alibaba-cloud/DEPLOY_RUNBOOK.md
+infra/alibaba-cloud/deployment-proof-checklist.md
+infra/alibaba-cloud/proof/
