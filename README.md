@@ -158,8 +158,8 @@ society makes *auditable* rather than invisible.
 
 > The scenario's 180,000 starting budget was chosen so the budget constraint actually *binds* — an
 > earlier value left the Finance veto dormant across every seed, which under-tested the exact
-> mechanism the system exists to demonstrate. That tuning, and the reasoning behind it, is written
-> up in [`docs/self-audit.md`](docs/self-audit.md).
+> mechanism the system exists to demonstrate. It's a deliberate benchmark-design choice to make the
+> constraint real, not a number picked to flatter the result (see [Honest limitations](#honest-limitations)).
 
 ---
 
@@ -289,7 +289,7 @@ symphony/
 ├── dashboard/                    # Next.js: map, command matrix, ledger, conflicts, benchmark
 ├── infra/alibaba-cloud/          # Terraform, deploy runbook, deployment-proof evidence
 ├── scripts/                      # demo driver, budget-adherence measurement
-├── docs/                         # architecture, demo script, self-audit, submission checklist
+├── docs/                         # architecture diagram + notes
 ├── docker-compose.yml            # local Neo4j + Redpanda + api + dashboard
 └── tests/                        # 87 tests, mock LLM, zero network
 ```
@@ -308,17 +308,26 @@ OpenAI-compatible endpoint, selected by `symphony/config.py`.
 
 ---
 
-## Honesty, on purpose
+## Honest limitations
 
-This project keeps a self-audit that was written *after* the numbers were measured, not before, and
-that names its own limitations rather than hiding them — the budget tuning, a metric that reads zero
-on this scenario, an unmodeled rescue-window edge. See [`docs/self-audit.md`](docs/self-audit.md).
-Model choices, data provenance (all scenario data is synthetic), and what this system is *not* are
-in [`responsible-ai.md`](responsible-ai.md).
+Stated up front, because a benchmark that only flatters you is a bug report:
 
-- [`docs/demo-script.md`](docs/demo-script.md) — the ~3-minute demo walkthrough.
-- [`docs/self-audit.md`](docs/self-audit.md) — an honest rubric self-check.
-- [`docs/submission-checklist.md`](docs/submission-checklist.md) — the submission checklist.
+- **The scenario budget was tuned to make the constraint bind.** As above, the 180,000 figure was
+  chosen deliberately so the Finance veto actually fires and the governance difference becomes
+  measurable. It makes the constraint real; it isn't a number reverse-engineered to make the society
+  win. The society wins *because* it respects a real constraint the baseline ignores.
+- **`resource_waste_pct` reads 0.0% for both modes on this scenario.** The waste metric only triggers
+  when an agent serves an already-resolved objective, which the agents never do here. The logic is
+  unit-tested with a synthetic case (`tests/test_benchmark.py`), but it has not gone non-zero in a
+  real run on this scenario.
+- **Rescue timing is not yet scored.** A trapped-persons objective rescued one tick after its window
+  closes currently counts the same as one rescued on time. The window is modeled and shown in agent
+  rationales, but `objectives_met_pct` only checks whether the rescue eventually happened. Fixing it
+  is documented future work, not silently shipped as if the number already accounts for it.
+
+Model choices, data provenance (all scenario data is synthetic — no real people, places, or
+incidents), and an explicit statement of what this system is *not* are in
+[`responsible-ai.md`](responsible-ai.md).
 
 ## License
 

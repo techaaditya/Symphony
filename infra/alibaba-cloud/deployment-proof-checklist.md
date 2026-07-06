@@ -7,10 +7,11 @@ recording, linked to specific code/config** — distinct from the ~3-minute feat
 
 **Scope actually deployed: the minimal proof, not the full Terraform stack.** The Terraform in
 `infra/alibaba-cloud/terraform/` (ECS + Tablestore + ApsaraMQ for Kafka + RAM) is real,
-validated-for-real infrastructure-as-code (see `docs/self-audit.md`'s note on `terraform plan`
-catching a real bug), but running it end to end needs an Alibaba Cloud AccessKey and a bound
-payment method configured well before a deadline. What was actually deployed for the required
-proof, under real time pressure, was simpler and still fully genuine:
+validated-for-real infrastructure-as-code (`terraform validate`/`plan` against real provider
+schemas caught a genuine Tablestore instance-name-length bug), but running it end to end needs an
+Alibaba Cloud AccessKey and a bound payment method configured well before a deadline. What was
+actually deployed for the required proof, under real time pressure, was simpler and still fully
+genuine:
 
 - **One ECS instance**, created directly via the Alibaba Cloud console (not `terraform apply`):
   `i-t4niew2qfik209oghsav`, 2 vCPU / 4 GiB, Singapore region, Ubuntu 22.04.

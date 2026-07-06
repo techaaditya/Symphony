@@ -48,3 +48,15 @@ Thumbs.db
 .vscode/
 .idea/
 .claude/
+
+# Personal / submission working docs — kept locally, not published to the repo.
+# These support the submission (video script, self-audit, form copy, blog draft,
+# diagram render) but aren't part of the shipped project.
+/Symphony_Agent_Society_Documentation_FINAL_QwenCloud.md
+docs/demo-script.md
+docs/self-audit.md
+docs/submission-checklist.md
+docs/submission-form.md
+docs/blog-post.md
+docs/architecture-diagram.html
+docs/architecture-diagram.png

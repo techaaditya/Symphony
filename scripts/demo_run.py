@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Scripted demo driver (docs/demo-script.md): starts a scenario against a
-running Symphony API and advances it one tick at a time at a pace suited to
-narrating over a screen recording of the dashboard's Live view -- rather
-than clicking "Start scenario" and hoping the timing lines up.
+"""Scripted demo driver: starts a scenario against a running Symphony API and
+advances it one tick at a time at a pace suited to narrating over a screen
+recording of the dashboard's Live view -- rather than clicking "Start
+scenario" and hoping the timing lines up.
 
 Uses only the standard library (no `requests`/`httpx`) so it runs against
 any Python 3.11+ with zero extra installs, against whatever's already

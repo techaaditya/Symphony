@@ -51,7 +51,7 @@ flowchart TB
     end
 
     subgraph Dashboard["Dashboard (Next.js)"]
-        Live["Live: disaster map + agent graph"]
+        Live["Live: disaster map + command matrix"]
         LedgerView["Ledger replay"]
         ConflictView["Conflict Graph Explorer"]
         BenchView["Benchmark chart"]
@@ -114,3 +114,9 @@ runs the `api`/`dashboard` containers via `docker-compose.prod.yml`; Tablestore 
 Kafka are separate managed services the API reaches over the network. See
 `infra/alibaba-cloud/terraform/` for the resource definitions and
 `infra/alibaba-cloud/DEPLOY_RUNBOOK.md` for the full deploy sequence.
+
+> **What was actually deployed for the submission proof** was a deliberately smaller slice of this
+> topology: one ECS instance running the Symphony API with **live Qwen (DashScope)**, while the bus,
+> blackboard and conflict graph stayed on their zero-config local defaults. The adapter pattern is
+> what makes that a legitimate partial deployment rather than a mock — the exact same code selects
+> the live Qwen backend from an env var.
